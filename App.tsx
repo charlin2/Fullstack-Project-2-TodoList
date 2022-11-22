@@ -26,16 +26,14 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import BlockIcon from '@mui/icons-material/Block';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import Stack from '@mui/material/Stack';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import toastr from 'toastr';
-import moment from 'moment';
+
 
 const AddButton = styled(Button)(({ theme }) => ({
   color: theme.palette.common.white,
@@ -47,14 +45,14 @@ const AddButton = styled(Button)(({ theme }) => ({
 
 function Body() {
   let [title, setTitle] = React.useState('');
-  let [description, setDescription] = React.useState('');
+  let [desc, setDesc] = React.useState('');
   const [value, setValue] = React.useState(dayjs());
   let [priority, setPriority] = React.useState('Low');
   let [isComplete, setIsComplete] = React.useState(false);
   let [toDo, setToDo] = React.useState([]);
   let [open, setOpen] = React.useState(false);
   let [titleValidation, setTitleValidation] = React.useState('');
-  let [descriptionValidation, setDescriptionValidation] =
+  let [descValidation, setDescValidation] =
     React.useState('');
   let [index, setIndex] = React.useState(0);
   let [test, setTest] = React.useState('');
@@ -78,16 +76,16 @@ function Body() {
     validateTitle(value);
   };
 
-  let handleDescriptionChange = (value) => {
-    setDescription(value);
-    validateDescription(value);
+  let handleDescChange = (value) => {
+    setDesc(value);
+    validateDesc(value);
   };
 
   let handleUpdateOpen = (title) => {
     let index = findIndexByTitle(title);
     let task = toDo[index];
     setTitle(title);
-    setDescription(task.description);
+    setDesc(task.desc);
     setValue(task.deadline);
     setPriority(task.priority);
   };
@@ -106,11 +104,11 @@ function Body() {
     }
   };
 
-  let validateDescription = (value) => {
+  let validateDesc = (value) => {
     if (!value) {
-      setDescriptionValidation('Description is required!');
+      setDescValidation('Description is required!');
     } else {
-      setDescriptionValidation('');
+      setDescValidation('');
     }
   };
 
@@ -152,14 +150,14 @@ function Body() {
       submit = false;
     }
     // Desc validation
-    if (description == '') {
-      setDescriptionValidatorMessage('Description is required!');
+    if (desc == '') {
+      setDescValidatorMessage('Description is required!');
       submit = false;
     }
     if (submit && titleValidation == '') {
       let task = {
         title: title,
-        description: description,
+        desc: desc,
         deadline: value,
         priority: priority,
         isComplete: false,
@@ -178,7 +176,7 @@ function Body() {
         });
       }
       setTitle('');
-      setDescription('');
+      setDesc('');
       setValue(dayjs());
       setPriority('Low');
       setIndex(index + 1);
@@ -199,7 +197,7 @@ function Body() {
             <div className="rightPosition">
               {' '}
               <div>
-                <AddButton onClick={() => handleClickOpen(false)}>
+                <AddButton onClick={(e) => handleClickOpen(false)}>
                   <AddCircleIcon fontSize="string" />
                   Add
                 </AddButton>
@@ -247,16 +245,16 @@ function Body() {
             />
             )}
             <TextField
-              error={descriptionValidation}
-              helperText={descriptionValidation}
+              error={descValidation}
+              helperText={descValidation}
               margin="normal"
               fullWidth
               required
               id="Description"
               label="Description"
               defaultValue=""
-              value={description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
+              value={desc}
+              onChange={(e) => handleDescChange(e.target.value)}
             />
             <Box mt={2}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -335,7 +333,7 @@ function Body() {
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell align="center">{row.title}</TableCell>
-                <TableCell align="center">{row.description}</TableCell>
+                <TableCell align="center">{row.desc}</TableCell>
                 <TableCell align="center">
                   {row.deadline.format('MM/DD/YY')}
                 </TableCell>
@@ -352,7 +350,7 @@ function Body() {
                     {!row.isComplete ? (
                       <Button
                         variant="contained"
-                        onClick={() => {
+                        onClick={(e) => {
                           handleClickOpen(true);
                           handleUpdateOpen(row.title);
                         }}
