@@ -20,6 +20,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import Stack from '@mui/material/Stack';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -29,11 +32,8 @@ import BlockIcon from '@mui/icons-material/Block';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
-import Stack from '@mui/material/Stack';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
-import toastr from 'toastr';
-
 
 const AddButton = styled(Button)(({ theme }) => ({
   color: theme.palette.common.white,
@@ -52,11 +52,12 @@ function Body() {
   let [toDo, setToDo] = React.useState([]);
   let [open, setOpen] = React.useState(false);
   let [titleValidation, setTitleValidation] = React.useState('');
-  let [descValidation, setDescValidation] =
-    React.useState('');
+  let [descValidation, setDescValidation] = React.useState('');
   let [index, setIndex] = React.useState(0);
   let [test, setTest] = React.useState('');
   let [update, setUpdate] = React.useState(false);
+  const [toast1, setToast1] = React.useState(false);
+  let [message, setMessage] = React.useState('');
 
   let handleClickOpen = (updateButton) => {
     if (updateButton) {
@@ -126,8 +127,8 @@ function Body() {
     // Checked
     if (toDo[index].isComplete) {
       toDo[index].isComplete = false;
-      setTest("checked");
-    // Unchecked
+      setTest('checked');
+      // Unchecked
     } else {
       toDo[index].isComplete = true;
       setTest('unchecked');
@@ -139,7 +140,25 @@ function Body() {
     let temp = toDo;
     temp.splice(index, 1);
     setToDo(temp);
+    handleToastOpen('Task deleted successfully!');
     setTest(index);
+  };
+
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  const handleToastOpen = (notif) => {
+    setToast1(true);
+    setMessage(notif);
+  };
+
+  const handleToastClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setToast1(false);
   };
 
   function handleAdd() {
@@ -166,14 +185,10 @@ function Body() {
       if (update) {
         let index = findIndexByTitle(title);
         toDo[index] = task;
-        toastr.success("Task successfully updated!", '', {
-          positionClass: 'toast-bottom-right',
-        });
+        handleToastOpen('Task updated successfully!');
       } else {
         toDo.push(task);
-        toastr.success(`Task added successfully!`, ``, {
-          positionClass: 'toast-bottom-right',
-        });
+        handleToastOpen('Task added successfully!');
       }
       setTitle('');
       setDesc('');
@@ -186,8 +201,20 @@ function Body() {
 
   return (
     <div>
-      {/* Header */}
-      <Box sx={{ flexGrow: 1 }}>
+      <Snackbar
+        open={toast1}
+        autoHideDuration={6000}
+        onClose={handleToastClose}
+      >
+        <Alert
+          onClose={handleToastClose}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+      <Box>
         <AppBar position="static">
           <Toolbar sx={{ justifyContent: 'center', position: 'relative' }}>
             <MenuIcon sx={{ mr: 1 }} />
@@ -201,48 +228,48 @@ function Body() {
                   <AddCircleIcon fontSize="string" />
                   Add
                 </AddButton>
-              </div> 
+              </div>
             </div>
           </Toolbar>
         </AppBar>
       </Box>
       <Dialog open={open} onClose={handleClose} maxWidth="xs">
         {update ? (
-        <AppBar position="static">
-          <Toolbar sx={{ justifyContent: 'left', position: 'relative' }}>
-            <EditIcon/>
-            <Typography variant="h6" component="div">
-              Edit Task
-            </Typography>
-          </Toolbar>
-        </AppBar>
+          <AppBar position="static">
+            <Toolbar sx={{ justifyContent: 'left', position: 'relative' }}>
+              <EditIcon />
+              <Typography variant="h6" component="div">
+                Edit Task
+              </Typography>
+            </Toolbar>
+          </AppBar>
         ) : (
-        <AppBar position="static">
-          <Toolbar sx={{ justifyContent: 'left', position: 'relative' }}>
-            <AddCircleIcon/>
-            <Typography variant="h6" component="div">
-              Add Task
-            </Typography>
-          </Toolbar>
-        </AppBar>
+          <AppBar position="static">
+            <Toolbar sx={{ justifyContent: 'left', position: 'relative' }}>
+              <AddCircleIcon />
+              <Typography variant="h6" component="div">
+                Add Task
+              </Typography>
+            </Toolbar>
+          </AppBar>
         )}
         <DialogContent>
           <Box component="form" noValidate autoComplete="off">
             {update ? (
               <div />
             ) : (
-            <TextField
-              error={titleValidation}
-              helperText={titleValidation}
-              margin="normal"
-              fullWidth
-              required
-              id="Title"
-              label="Title"
-              defaultValue=""
-              value={title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-            />
+              <TextField
+                error={titleValidation}
+                helperText={titleValidation}
+                margin="normal"
+                fullWidth
+                required
+                id="Title"
+                label="Title"
+                defaultValue=""
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+              />
             )}
             <TextField
               error={descValidation}
@@ -297,15 +324,15 @@ function Body() {
         </DialogContent>
         <DialogActions>
           {update ? (
-          <Button variant="contained" onClick={handleAdd}>
-            <EditIcon sx={{ mr: 1 }} />
-            Edit
-          </Button>
+            <Button variant="contained" onClick={handleAdd}>
+              <EditIcon sx={{ mr: 1 }} />
+              Edit
+            </Button>
           ) : (
-          <Button variant="contained" onClick={handleAdd}>
-            <AddCircleIcon sx={{ mr: 1 }} />
-            Add
-          </Button>
+            <Button variant="contained" onClick={handleAdd}>
+              <AddCircleIcon sx={{ mr: 1 }} />
+              Add
+            </Button>
           )}
           <Button color="error" variant="contained" onClick={handleClose}>
             <BlockIcon sx={{ mr: 1 }} />
