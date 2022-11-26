@@ -35,14 +35,9 @@ import dayjs from 'dayjs';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-const AddButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.common.white,
-  backgroundColor: theme.palette.primary.light,
-  '&:hover': {
-    backgroundColor: theme.palette.primary.main,
-  },
-}));
-
+/*
+ * Functionality for tuples
+ */
 function Body() {
   let [title, setTitle] = React.useState('');
   let [desc, setDesc] = React.useState('');
@@ -59,6 +54,7 @@ function Body() {
   const [toast1, setToast1] = React.useState(false);
   let [message, setMessage] = React.useState('');
 
+  // Toggle Add menu
   let handleClickOpen = (updateButton) => {
     if (updateButton) {
       setUpdate(true);
@@ -82,6 +78,7 @@ function Body() {
     validateDesc(value);
   };
 
+  // Update menu instead of add menu
   let handleUpdateOpen = (title) => {
     let index = findIndexByTitle(title);
     let task = toDo[index];
@@ -117,11 +114,13 @@ function Body() {
     setValue(newValue);
   };
 
+  // Helper method to traverse tuples
   let findIndexByTitle = (title) => {
     const isCorrectTitle = (element) => element.title == title;
     return toDo.findIndex(isCorrectTitle);
   };
 
+  // Is completed?
   let handleCheckChange = (title) => {
     let index = findIndexByTitle(title);
     // Checked
@@ -144,6 +143,7 @@ function Body() {
     setTest(index);
   };
 
+  // Toaster stuff (toastr wasn't working for some reason, maybe not compatible with React)
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
@@ -168,11 +168,12 @@ function Body() {
       setTitleValidation('Title is required!');
       submit = false;
     }
-    // Desc validation
+    // Description validation
     if (desc == '') {
-      setDescValidatorMessage('Description is required!');
+      setDescValidation('Description is required!');
       submit = false;
     }
+    // Valid form is submitted
     if (submit && titleValidation == '') {
       let task = {
         title: title,
@@ -182,6 +183,7 @@ function Body() {
         isComplete: false,
         index: index,
       };
+      // Update menu instead of Add menu
       if (update) {
         let index = findIndexByTitle(title);
         toDo[index] = task;
@@ -198,6 +200,15 @@ function Body() {
       handleClose();
     }
   }
+
+  // Styling for the 'Add' button
+  const AddButton = styled(Button)(({ theme }) => ({
+    color: theme.palette.common.white,
+    backgroundColor: theme.palette.primary.light,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.main,
+    },
+  }));
 
   return (
     <div>
